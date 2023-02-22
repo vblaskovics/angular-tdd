@@ -1,19 +1,20 @@
 import { TestBed } from '@angular/core/testing';
 
 import { CounterService } from './counter.service';
-import { TestScheduler } from 'rxjs/testing';
-import { ReplaySubject } from 'rxjs';
+import { RunHelpers, TestScheduler } from 'rxjs/testing';
+import { ReplaySubject, of } from 'rxjs';
 
-const testScheduler = new TestScheduler((actual, expected) => {
-  expect(actual).toEqual(expected);
-});
 
 describe('CounterService', () => {
   let service: CounterService;
-
+  let testScheduler:TestScheduler;
+  
   beforeEach(() => {
     TestBed.configureTestingModule({});
     service = TestBed.inject(CounterService);
+    testScheduler = new TestScheduler((actual, expected) => {
+      expect(actual).toEqual(expected);
+    });
   });
 
   it('should be created', () => {
@@ -44,14 +45,22 @@ describe('CounterService', () => {
     service.incrementCounter();
   });
 
-  it('should be able to increment a counter value', () => {
+  it('should be able to increment a counter value once', () => {
+    let counter$ = service.getCounter$();
+    service.incrementCounter();
+    testScheduler.run((helpers) => {
+      const { expectObservable } = helpers;
+      expectObservable(counter$).toBe('(a)', {a: 1});
+    });
+  });
+
+  it('should be able to increment a counter value countinously', () => {
     let counter$ = service.getCounter$();
     let replaySubject$ = new ReplaySubject<number>();
     counter$.subscribe(replaySubject$);
     service.incrementCounter();
     service.incrementCounter();
     service.incrementCounter();
-
     testScheduler.run((helpers) => {
       const { expectObservable } = helpers;
       expectObservable(replaySubject$).toBe('(abcd)', { a: 0, b: 1, c: 2, d: 3 });
