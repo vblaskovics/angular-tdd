@@ -54,7 +54,7 @@ describe('CounterService', () => {
 
     testScheduler.run((helpers) => {
       const { expectObservable } = helpers;
-      expectObservable(replaySubject$).toBe('(abcd)', { a: 0, b: 10, c: 2, d: 3 });
+      expectObservable(replaySubject$).toBe('(abcd)', { a: 0, b: 1, c: 2, d: 3 });
     });
   });
 
